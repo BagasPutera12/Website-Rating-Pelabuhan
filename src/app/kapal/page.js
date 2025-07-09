@@ -1,31 +1,11 @@
-// src/app/kapal/page.js
+// src/app/kapal/page.js (FINAL DENGAN DATA LANGSUNG)
 
 import Link from 'next/link';
-
-// Fungsi untuk mengambil daftar kapal dari API
-// Di dalam src/app/kapal/page.js
-// Di dalam src/app/kapal/page.js
-// Di dalam src/app/kapal/page.js
-async function getShips() {
-  try {
-    const apiUrl = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : 'http://localhost:3000';
-
-    const res = await fetch(`${apiUrl}/api/ships`, { 
-      next: { revalidate: 60 } 
-    });
-
-    if (!res.ok) return [];
-    return res.json();
-  } catch (error) {
-    console.error("Failed to fetch ships:", error);
-    return [];
-  }
-}
+import { getAllShips } from '@/lib/data-service';
 
 export default async function ShipListPage() {
-  const ships = await getShips();
+  // Langsung panggil fungsi dari data-service, tanpa fetch
+  const ships = await getAllShips();
 
   return (
     <div className="container mx-auto px-4 py-8">

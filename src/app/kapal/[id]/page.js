@@ -1,30 +1,14 @@
-// src/app/kapal/[id]/page.js (FINAL DENGAN PERBAIKAN ESLINT)
+// src/app/kapal/[id]/page.js (FINAL DENGAN DATA LANGSUNG)
 
 import Link from 'next/link';
+import { getShipDetailsById } from '@/lib/data-service';
 
-// Di dalam src/app/kapal/[id]/page.js
-// Di dalam src/app/kapal/[id]/page.js
-// Di dalam src/app/kapal/[id]/page.js
-async function getShipDetails(id) {
-  try {
-    const apiUrl = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : 'http://localhost:3000';
-
-    const res = await fetch(`${apiUrl}/api/ships/${id}`, { 
-      next: { revalidate: 60 } 
-    });
-
-    if (!res.ok) return null;
-    return res.json();
-  } catch (error) {
-    console.error(`Failed to fetch ship ${id}:`, error);
-    return null;
-  }
-}
+// Impor komponen rating kapal yang sekarang jadi Client Component
+import ShipRatingClient from '@/components/ShipRatingClient';
 
 export default async function ShipDetailPage({ params }) {
-  const data = await getShipDetails(params.id);
+  // Langsung panggil fungsi dari data-service, tanpa fetch
+  const data = await getShipDetailsById(params.id);
 
   if (!data || !data.ship) {
     return (
@@ -71,23 +55,8 @@ export default async function ShipDetailPage({ params }) {
         </a>
       </div>
 
-      <div className="mt-10 pt-6 border-t">
-        <h2 className="text-2xl font-bold text-primary-blue mb-4">Rating Pengguna</h2>
-        {ratings.length > 0 ? (
-          <div className="space-y-4">
-            {ratings.map((rating) => (
-              <div key={rating._id} className="border-l-4 border-accent-gold pl-4 py-2 bg-gray-50 rounded">
-                <p className="font-bold text-lg text-yellow-500">{'★'.repeat(rating.rating)}{'☆'.repeat(5 - rating.rating)}</p>
-                {/* --- BAGIAN YANG DIPERBAIKI --- */}
-                {/* Kita tidak lagi menggunakan kutip ganda secara langsung */}
-                {rating.comment && <p className="text-text-dark mt-1 italic">&ldquo;{rating.comment}&rdquo;</p>}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-text-light">Belum ada penilaian untuk kapal ini.</p>
-        )}
-      </div>
+      {/* Komponen untuk rating akan kita buat terpisah */}
+      <ShipRatingClient shipId={params.id} initialRatings={ratings} />
     </div>
   );
 }

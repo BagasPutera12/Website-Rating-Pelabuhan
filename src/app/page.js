@@ -1,4 +1,8 @@
+// src/app/page.js (FINAL DENGAN DATA LANGSUNG)
+
 import Link from 'next/link';
+import { getSummaryData } from '@/lib/data-service';
+import { ASPECTS } from '@/data/surveyData';
 
 // Helper component untuk Bintang
 const StarRatingDisplay = ({ rating, size = 'text-2xl' }) => {
@@ -13,49 +17,17 @@ const StarRatingDisplay = ({ rating, size = 'text-2xl' }) => {
   );
 };
 
-// Fungsi untuk mengambil data summary (Server-side)
-// Di dalam src/app/page.js
-// Di dalam src/app/page.js
-// Di dalam src/app/page.js
-async function getSummary() {
-  try {
-    // --- PERBAIKAN ---
-    // Vercel menyediakan process.env.VERCEL_URL saat build
-    const apiUrl = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : 'http://localhost:3000'; // Fallback untuk development lokal
-
-    const res = await fetch(`${apiUrl}/api/aspect-ratings/summary`, { 
-      next: { revalidate: 60 } // Revalidasi data setiap 60 detik
-    });
-    // --- AKHIR PERBAIKAN ---
-
-    if (!res.ok) return { overallAverage: 0, aspectAverages: [] };
-    return res.json();
-  } catch (error) {
-    console.error("Failed to fetch summary:", error);
-    return { overallAverage: 0, aspectAverages: [] };
-  }
-}
-
-// Data Aspek bisa kita simpan di sini atau di file terpisah
-const ASPECTS = [
-    { name: "Keamanan & Keselamatan" }, { name: "Fasilitas" },
-    { name: "Kebersihan & Kenyamanan" }, { name: "Informasi & Komunikasi" },
-    { name: "Aksesibilitas & Proses" }, { name: "Pelayanan Petugas" }
-];
-
 export default async function HomePage() {
-  const summary = await getSummary();
+  // Langsung panggil fungsi dari data-service, tanpa fetch
+  const summary = await getSummaryData();
   const overallAverage = summary.overallAverage || 0;
 
   return (
     <>
-      {/* Hero Section */}
       <section 
         className="text-white text-center py-20 px-4" 
         style={{ 
-          backgroundImage: "linear-gradient(rgba(10, 77, 104, 0.85), rgba(10, 77, 104, 0.85)), url('https://maritimnews.com/wp-content/uploads/2022/11/IMG-20221125-WA0031-1024x576.jpg')",
+          backgroundImage: "linear-gradient(rgba(10, 77, 104, 0.85), rgba(10, 77, 104, 0.85)), url('https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Pelabuhan_Teluk_Bayur_di_sore_hari.jpg/1280px-Pelabuhan_Teluk_Bayur_di_sore_hari.jpg')",
           backgroundSize: 'cover',
           backgroundPosition: 'center'
         }}
@@ -72,8 +44,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Main Content Container */}
-      <div className="container mx-auto px-4 py-12">
+      <main className="container mx-auto px-4 py-12">
         <h2 className="text-3xl font-bold text-center text-primary-blue mb-10">Penilaian per Aspek</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {ASPECTS.map((aspect) => {
@@ -89,7 +60,6 @@ export default async function HomePage() {
           })}
         </div>
 
-        {/* Call to Action Section */}
         <section className="mt-20 text-center bg-white p-10 rounded-xl shadow-lg">
           <h2 className="text-2xl font-bold text-primary-blue">Bantu Kami Menjadi Lebih Baik</h2>
           <p className="max-w-2xl mx-auto my-4 text-text-dark">Ikuti survei kepuasan lengkap untuk semua aspek pelayanan melalui tombol di bawah ini.</p>
@@ -97,7 +67,7 @@ export default async function HomePage() {
             Mulai Isi Survei
           </Link>
         </section>
-      </div>
+      </main>
     </>
   );
 }
