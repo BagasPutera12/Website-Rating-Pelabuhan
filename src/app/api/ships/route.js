@@ -9,7 +9,7 @@ import { authenticateRequest } from '@/lib/auth'; // Impor "satpam"
 
 // Fungsi GET (tidak berubah)
 export async function GET() {
- await mongoose.connect(process.env.MONGO_URI);
+ await dbConnect(); 
   try {
     const ships = await Ship.aggregate([
       { $lookup: { from: 'ratings', localField: '_id', foreignField: 'shipId', as: 'ratings' } },
@@ -29,7 +29,7 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Akses ditolak. API Key tidak valid atau tidak ada.' }, { status: 401 });
   }
 
-  await mongoose.connect(process.env.MONGO_URI);
+  await dbConnect(); 
 
   try {
     const data = await request.json(); // Ambil data dari body

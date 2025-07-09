@@ -1,14 +1,20 @@
 // src/lib/dbConnect.js
+
 import mongoose from 'mongoose';
 
 const MONGO_URI = process.env.MONGO_URI;
 
 if (!MONGO_URI) {
   throw new Error(
-    'Please define the MONGO_URI environment variable inside .env.local'
+    'Tolong definisikan variabel MONGO_URI di dalam .env.local'
   );
 }
 
+/**
+ * Global is used here to maintain a cached connection across hot reloads
+ * in development. This prevents connections from growing exponentially
+ * during API route usage.
+ */
 let cached = global.mongoose;
 
 if (!cached) {
@@ -29,7 +35,14 @@ async function dbConnect() {
       return mongoose;
     });
   }
-  cached.conn = await cached.promise;
+
+  try {
+    cached.conn = await cached.promise;
+  } catch (e) {
+    cached.promise = null;
+    throw e;
+  }
+
   return cached.conn;
 }
 
