@@ -2,9 +2,9 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import AspectRating from '@/models/AspectRating';
-
+import mongoose from 'mongoose';
 export async function GET() {
-  await dbConnect();
+  await mongoose.connect(process.env.MONGO_URI); 
   try {
     const aspectAverages = await AspectRating.aggregate([
       { $group: { _id: '$aspect', averageRating: { $avg: '$rating' } } },

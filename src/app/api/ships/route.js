@@ -4,11 +4,12 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Ship from '@/models/Ship';
 import Rating from '@/models/Rating'; // Pastikan Rating diimpor
+import mongoose from 'mongoose'; 
 import { authenticateRequest } from '@/lib/auth'; // Impor "satpam"
 
 // Fungsi GET (tidak berubah)
 export async function GET() {
-  await dbConnect();
+ await mongoose.connect(process.env.MONGO_URI);
   try {
     const ships = await Ship.aggregate([
       { $lookup: { from: 'ratings', localField: '_id', foreignField: 'shipId', as: 'ratings' } },
@@ -28,7 +29,7 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Akses ditolak. API Key tidak valid atau tidak ada.' }, { status: 401 });
   }
 
-  await dbConnect();
+  await mongoose.connect(process.env.MONGO_URI);
 
   try {
     const data = await request.json(); // Ambil data dari body

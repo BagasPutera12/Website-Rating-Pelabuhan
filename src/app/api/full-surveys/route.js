@@ -3,11 +3,12 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import SurveySubmission from '@/models/SurveySubmission';
 import AspectRating from '@/models/AspectRating';
+import mongoose from 'mongoose';
 // Kita akan buat fungsi email nanti, untuk sekarang kita fokus menyimpan data
 // import { sendNotificationEmail } from '@/lib/email';
 
 export async function POST(request) {
-  await dbConnect();
+  await mongoose.connect(process.env.MONGO_URI);
   try {
     const { userName, userEmail, ratings, suggestion } = await request.json();
 

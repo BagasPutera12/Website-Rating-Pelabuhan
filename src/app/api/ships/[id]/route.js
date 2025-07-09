@@ -1,5 +1,5 @@
 // src/app/api/ships/[id]/route.js
-
+import mongoose from 'mongoose';
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Ship from '@/models/Ship';
@@ -8,7 +8,7 @@ import { authenticateRequest } from '@/lib/auth';
 
 // Fungsi GET untuk satu kapal (tidak berubah dari rencana)
 export async function GET(request, { params }) {
-  await dbConnect();
+  await mongoose.connect(process.env.MONGO_URI);
   try {
     const ship = await Ship.findById(params.id);
     if (!ship) {
@@ -28,7 +28,7 @@ export async function DELETE(request, { params }) {
     return NextResponse.json({ error: 'Akses ditolak.' }, { status: 401 });
   }
 
-  await dbConnect();
+  await mongoose.connect(process.env.MONGO_URI);
 
   try {
     const deletedShip = await Ship.findByIdAndDelete(params.id);
