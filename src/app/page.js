@@ -14,10 +14,21 @@ const StarRatingDisplay = ({ rating, size = 'text-2xl' }) => {
 };
 
 // Fungsi untuk mengambil data summary (Server-side)
+// Di dalam src/app/page.js
 async function getSummary() {
   try {
-    // Di sisi server, kita bisa menggunakan localhost. Vercel akan menanganinya.
-    const res = await fetch(`http://localhost:3000/api/aspect-ratings/summary`, { cache: 'no-store' });
+    // --- PERBAIKAN ---
+    // Gunakan VERCEL_URL saat di Vercel, dan localhost saat development
+    const apiUrl = process.env.VERCEL_URL 
+      ? `https://${process.env.VERCEL_URL}` 
+      : 'http://localhost:3000';
+
+    const res = await fetch(`${apiUrl}/api/aspect-ratings/summary`, { 
+      // Ganti 'no-store' agar Vercel bisa melakukan optimisasi
+      next: { revalidate: 10 } // Ambil data baru setiap 10 detik
+    });
+    // --- AKHIR PERBAIKAN ---
+
     if (!res.ok) return { overallAverage: 0, aspectAverages: [] };
     return res.json();
   } catch (error) {
