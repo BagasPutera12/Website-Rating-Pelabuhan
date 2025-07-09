@@ -4,11 +4,17 @@ import Link from 'next/link';
 
 // Di dalam src/app/kapal/[id]/page.js
 // Di dalam src/app/kapal/[id]/page.js
+// Di dalam src/app/kapal/[id]/page.js
 async function getShipDetails(id) {
   try {
-    const res = await fetch(`/api/ships/${id}`, { 
-      next: { revalidate: 10 } 
+    const apiUrl = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : 'http://localhost:3000';
+
+    const res = await fetch(`${apiUrl}/api/ships/${id}`, { 
+      next: { revalidate: 60 } 
     });
+
     if (!res.ok) return null;
     return res.json();
   } catch (error) {

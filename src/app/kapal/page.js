@@ -5,12 +5,18 @@ import Link from 'next/link';
 // Fungsi untuk mengambil daftar kapal dari API
 // Di dalam src/app/kapal/page.js
 // Di dalam src/app/kapal/page.js
+// Di dalam src/app/kapal/page.js
 async function getShips() {
   try {
-    const res = await fetch(`/api/ships`, { 
-      next: { revalidate: 10 } 
+    const apiUrl = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : 'http://localhost:3000';
+
+    const res = await fetch(`${apiUrl}/api/ships`, { 
+      next: { revalidate: 60 } 
     });
-    if (!res.ok) return []; 
+
+    if (!res.ok) return [];
     return res.json();
   } catch (error) {
     console.error("Failed to fetch ships:", error);
