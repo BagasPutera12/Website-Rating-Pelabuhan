@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
-import mongoose from 'mongoose';
+import dbConnect from '@/lib/dbConnect';
 import Ship from '@/models/Ship';
 import Rating from '@/models/Rating';
 import { authenticateRequest } from '@/lib/auth';
 
 export async function GET(request, { params }) {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
+    await dbConnect();
     const ship = await Ship.findById(params.id);
     if (!ship) {
       return NextResponse.json({ error: 'Kapal tidak ditemukan.' }, { status: 404 });
@@ -23,7 +23,7 @@ export async function DELETE(request, { params }) {
     return NextResponse.json({ error: 'Akses ditolak.' }, { status: 401 });
   }
   try {
-    await mongoose.connect(process.env.MONGO_URI);
+    await dbConnect();
     const deletedShip = await Ship.findByIdAndDelete(params.id);
     if (!deletedShip) {
       return NextResponse.json({ error: 'Kapal tidak ditemukan untuk dihapus.' }, { status: 404 });

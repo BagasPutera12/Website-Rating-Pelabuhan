@@ -1,16 +1,11 @@
-// src/lib/data-service.js (VERSI PALING STABIL)
-
-import mongoose from 'mongoose';
+import dbConnect from './dbConnect'; // <-- Gunakan dbConnect
 import Ship from '@/models/Ship';
 import AspectRating from '@/models/AspectRating';
 import Rating from '@/models/Rating';
 
-const MONGO_URI = process.env.MONGO_URI;
-
-// Fungsi untuk mengambil summary (digunakan oleh HomePage)
 export async function getSummaryData() {
   try {
-    await mongoose.connect(MONGO_URI);
+    await dbConnect(); // <-- Panggil di awal
     const aspectAverages = await AspectRating.aggregate([
       { $group: { _id: '$aspect', averageRating: { $avg: '$rating' } } },
       { $project: { aspect: '$_id', averageRating: 1, _id: 0 } }
@@ -21,18 +16,30 @@ export async function getSummaryData() {
       const sum = aspectAverages.reduce((sum, item) => sum + item.averageRating, 0);
       overallAverage = sum / aspectAverages.length;
     }
-    return { overallAverage, aspectAverages };
+
+    const recentSuggestions = await AspectRating.find({
+        suggestion: { $exists: true, $ne: '' }
+    }).sort({ createdAt: -1 }).limit(3).select('suggestion createdAt _id');
+
+    const uniqueSuggestions = [];
+    const seenSuggestions = new Set();
+    for (const item of recentSuggestions) {
+        if (!seenSuggestions.has(item.suggestion)) {
+            seenSuggestions.add(item.suggestion);
+            uniqueSuggestions.push(item);
+        }
+    }
+
+    return { overallAverage, aspectAverages, recentSuggestions: uniqueSuggestions };
   } catch (error) {
     console.error("Error di getSummaryData:", error);
-    // Kembalikan data default jika error agar tidak crash
-    return { overallAverage: 0, aspectAverages: [] };
+    return { overallAverage: 0, aspectAverages: [], recentSuggestions: [] };
   }
 }
 
-// Fungsi untuk mengambil semua kapal (digunakan oleh ShipListPage)
 export async function getAllShips() {
   try {
-    await mongoose.connect(MONGO_URI);
+    await dbConnect(); // <-- Panggil di awal
     return Ship.aggregate([
       { $lookup: { from: 'ratings', localField: '_id', foreignField: 'shipId', as: 'ratings' } },
       { $addFields: { avgRating: { $ifNull: [{ $avg: '$ratings.rating' }, 0] } } },
@@ -40,21 +47,19 @@ export async function getAllShips() {
     ]);
   } catch (error) {
     console.error("Error di getAllShips:", error);
-    return []; // Kembalikan array kosong jika error
+    return [];
   }
 }
 
-// Fungsi untuk mengambil detail satu kapal (digunakan oleh ShipDetailPage)
 export async function getShipDetailsById(id) {
   try {
-    await mongoose.connect(MONGO_URI);
+    await dbConnect(); // <-- Panggil di awal
     const ship = await Ship.findById(id).lean();
     if (!ship) return null;
     const ratings = await Rating.find({ shipId: id }).sort({ createdAt: -1 }).lean();
     return { ship, ratings };
-  } catch (error)
-  {
+  } catch (error) {
     console.error("Error di getShipDetailsById:", error);
-    return null; // Kembalikan null jika error
+    return null;
   }
 }

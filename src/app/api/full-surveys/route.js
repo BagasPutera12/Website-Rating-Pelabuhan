@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
-import mongoose from 'mongoose';
+import dbConnect from '@/lib/dbConnect';
 import SurveySubmission from '@/models/SurveySubmission';
 import AspectRating from '@/models/AspectRating';
-import { sendNotificationEmail } from '@/lib/email-service'; // Kita akan buat ini
+import { sendNotificationEmail } from '@/lib/email-service';
 
 export async function POST(request) {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
+    await dbConnect();
     const { userName, userEmail, ratings, suggestion } = await request.json();
 
     if (!userName || !userEmail || !ratings || !Array.isArray(ratings)) {
@@ -23,7 +23,9 @@ export async function POST(request) {
       rating: r.rating
     }));
         
-    await AspectRating.insertMany(ratingsToInsert);
+    if (ratingsToInsert.length > 0) {
+      await AspectRating.insertMany(ratingsToInsert);
+    }
         
     sendNotificationEmail(savedSubmission, ratings);
 

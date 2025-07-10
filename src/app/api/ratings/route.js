@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import mongoose from 'mongoose';
+import dbConnect from '@/lib/dbConnect';
 import Rating from '@/models/Rating';
 import Ship from '@/models/Ship';
 
 export async function POST(request) {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
+    await dbConnect();
     const { shipId, rating, comment } = await request.json();
     if (!shipId || !rating) {
       return NextResponse.json({ error: 'ID Kapal dan rating wajib diisi.' }, { status: 400 });

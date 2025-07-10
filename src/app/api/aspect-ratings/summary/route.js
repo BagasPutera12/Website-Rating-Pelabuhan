@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
-import mongoose from 'mongoose';
+import dbConnect from '@/lib/dbConnect';
 import AspectRating from '@/models/AspectRating';
 
 export async function GET() {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
+    await dbConnect();
     const aspectAverages = await AspectRating.aggregate([
       { $group: { _id: '$aspect', averageRating: { $avg: '$rating' } } },
       { $project: { aspect: '$_id', averageRating: 1, _id: 0 } }
@@ -23,7 +23,7 @@ export async function GET() {
     const uniqueSuggestions = [];
     const seenSuggestions = new Set();
     for (const item of recentSuggestions) {
-        if (!seenSuggestions.has(item.suggestion)) {
+        if (item.suggestion && !seenSuggestions.has(item.suggestion)) {
             seenSuggestions.add(item.suggestion);
             uniqueSuggestions.push(item);
         }
