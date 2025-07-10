@@ -1,10 +1,10 @@
-// src/app/api/aspect-ratings/summary/route.js
 import { NextResponse } from 'next/server';
-import dbConnect from '@/lib/dbConnect';
+import mongoose from 'mongoose';
 import AspectRating from '@/models/AspectRating';
+
 export async function GET() {
-  await dbConnect();  
   try {
+    await mongoose.connect(process.env.MONGO_URI);
     const aspectAverages = await AspectRating.aggregate([
       { $group: { _id: '$aspect', averageRating: { $avg: '$rating' } } },
       { $project: { aspect: '$_id', averageRating: 1, _id: 0 } }
@@ -16,9 +16,23 @@ export async function GET() {
       overallAverage = sumOfAverages / aspectAverages.length;
     }
 
+    const recentSuggestions = await AspectRating.find({
+        suggestion: { $exists: true, $ne: '' }
+    }).sort({ createdAt: -1 }).limit(3).select('suggestion createdAt _id');
+
+    const uniqueSuggestions = [];
+    const seenSuggestions = new Set();
+    for (const item of recentSuggestions) {
+        if (!seenSuggestions.has(item.suggestion)) {
+            seenSuggestions.add(item.suggestion);
+            uniqueSuggestions.push(item);
+        }
+    }
+
     return NextResponse.json({
-      overallAverage: overallAverage,
-      aspectAverages: aspectAverages,
+      overallAverage,
+      aspectAverages,
+      recentSuggestions: uniqueSuggestions
     });
   } catch (error) {
     return NextResponse.json({ error: 'Gagal mengambil ringkasan data.' }, { status: 500 });
