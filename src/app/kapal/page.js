@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { getAllShips } from '@/lib/data-service';
-
+export const dynamic = 'force-dynamic';
 export default async function ShipListPage() {
   // Langsung panggil fungsi dari data-service, tanpa fetch
   const ships = await getAllShips();

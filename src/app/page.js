@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { getSummaryData } from '@/lib/data-service';
 import { ASPECTS } from '@/data/surveyData';
 
+export const dynamic = 'force-dynamic'; // <-- TAMBAHKAN BARIS INI
 // Helper component untuk Bintang
 const StarRatingDisplay = ({ rating, size = 'text-2xl' }) => {
   const totalStars = 5;

@@ -5,7 +5,7 @@ import { getShipDetailsById } from '@/lib/data-service';
 
 // Impor komponen rating kapal yang sekarang jadi Client Component
 import ShipRatingClient from '@/components/ShipRatingClient';
-
+export const dynamic = 'force-dynamic';
 export default async function ShipDetailPage({ params }) {
   // Langsung panggil fungsi dari data-service, tanpa fetch
   const data = await getShipDetailsById(params.id);
